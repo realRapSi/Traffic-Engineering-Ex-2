@@ -19,6 +19,8 @@ class Cell:
         self.fd = fd
         self.previous_cell = None
         self.next_cell = None
+        self.on_ramp = None
+        self.off_ramp = None
 
          # main parameters
         self.density = self.vehicles / self.length
@@ -32,13 +34,29 @@ class Cell:
         
         #inflow
         if self.previous_cell:
-            self.inflow = self.previous_cell.outflow
-            if self.inflow < 0:
-                raise ValueError("negative inflow:", self.inflow)
+            if self.has_onramp:
+                self.inflow = self.previous_cell.outflow + self.on_ramp.outflow
+            else:
+                self.inflow = self.previous_cell.outflow
 
         #outflow
         if self.next_cell:
-            self.outflow = min((1-self.beta)*self.speed*self.density, self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density), self.fd.maximum_flow)
+            if not self.next_cell.has_onramp:
+                self.outflow = min((1-self.beta)*self.speed*self.density, self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density), self.fd.maximum_flow)
+            else:
+                temp_outflow_cell = min((1-self.beta)*self.speed*self.density, self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density), self.fd.maximum_flow)
+                temp_outflow_on_ramp = self.next_cell.on_ramp.on_ramp_temp_outflow(timestep)
+
+                downstream_supply = (self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density))
+
+                if (temp_outflow_on_ramp + temp_outflow_cell) <= downstream_supply:
+                    self.outflow = temp_outflow_cell
+                    self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp)
+                    print('cell outflow:', self.outflow)
+                    print('on-ramp outflow:', temp_outflow_on_ramp)
+                else:
+                    self.outflow = temp_outflow_cell / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply
+                    self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply)
 
             if self.outflow < 0:
                 self.outflow = 0
@@ -62,8 +80,10 @@ class Cell:
 
         self.time_step = timestep
 
-    def dump_data(self, array=[]):
-        array[self.id, self.time_step] = self.flow
+    def dump_data(self, flow=[], density=[]):
+        flow[self.id, self.time_step] = self.flow
+        density[self.id, self.time_step] = self.density
+
 
 
 
