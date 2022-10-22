@@ -10,7 +10,7 @@ class Fd:
         self.jam_density_total = self.lanes * self.jam_density
         self.maximum_flow_total = self.lanes * self.max_flow
         self.critical_density = self.maximum_flow_total / self.freeflow_speed
-        self.wavespeed = self.maximum_flow_total / (self.critical_density - self.jam_density_total)
+        self.wavespeed = abs(self.maximum_flow_total / (self.critical_density - self.jam_density_total))
 
     
     def get_flow(self, density):
