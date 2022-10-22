@@ -21,12 +21,11 @@ class Cell:
         self.next_cell = None
 
          # main parameters
-        self.density_new = self.vehicles / self.length
-        self.density_old = self.density_new
-        self.flow = self.fd.get_flow(self.density_new)
+        self.density = self.vehicles / self.length
+        self.flow = self.fd.get_flow(self.density)
         self.speed = 0
-        if self.density_old:
-            self.speed = self.flow / self.density_old
+        if self.density:
+            self.speed = self.flow / self.density
         
     #update parameters    
     def update(self, timestep):
@@ -36,41 +35,35 @@ class Cell:
             self.inflow = self.previous_cell.outflow
             if self.inflow < 0:
                 raise ValueError("negative inflow:", self.inflow)
-            self.vehicles += self.inflow
+
+        #outflow
+        if self.next_cell:
+            self.outflow = min((1-self.beta)*self.speed*self.density, self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density), self.fd.maximum_flow)
+
+            if self.outflow < 0:
+                self.outflow = 0
+
+        # last cell downstream
+        else:
+            self.outflow = min((1-self.beta)*self.speed*self.density, self.fd.maximum_flow)
+
+        #vehicles
+        self.vehicles = self.vehicles + self.time_factor * (self.inflow - self.outflow)
 
         #density
         if self.vehicles:
-            self.density_new = self.vehicles / self.length
-            self.flow = self.fd.get_flow(self.density_new)
-            self.speed = self.flow / self.density_new
+            self.density = self.vehicles / self.length
+            self.flow = self.fd.get_flow(self.density)
+            self.speed = self.flow / self.density
         else:
             self.density = 0
             self.flow = 0
             self.speed = 0
 
-        #outflow
-        if self.next_cell:
-            self.outflow = min((1-self.beta)*self.speed*self.density_old, abs(-self.next_cell.fd.wavespeed*(self.next_cell.fd.critical_density-self.next_cell.density_old)/self.time_factor), self.fd.maximum_flow_total)*self.time_factor
-            #print('speed*density:', self.time_factor * (1-self.beta)*self.speed*self.density_old)
-            #print('next cell intake:', -self.next_cell.fd.wavespeed*(self.next_cell.fd.critical_density-self.next_cell.density_old))
-            #print('max flow:', self.fd.maximum_flow_total)          
-            if self.outflow < 0:
-                self.outflow = 0
-            temp_vehicles = self.vehicles
-            self.vehicles -= self.outflow
-            if self.vehicles < 0:
-                self.vehicles = 0
-        # last cell downstream
-        else:
-            self.outflow = min((1-self.beta)*self.speed*self.density_old, self.fd.maximum_flow_total)*self.time_factor
-            self.vehicles -= self.outflow
-
-        self.density_old = self.density_new
         self.time_step = timestep
 
-
     def dump_data(self, array=[]):
-        array.append([self.id, self.density_old, self.flow, self.time_step, self.vehicles, self.inflow, self.outflow])
+        array[self.id, self.time_step] = self.flow
 
 
 
