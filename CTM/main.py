@@ -19,7 +19,7 @@ cell1 = Cell(1, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
 cell2 = Cell(2, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
 cell3 = Cell(3, 0, 0.5, 0, True, False, 0, 3, fundamental_diagram, TIMESTEP)
 cell4 = Cell(4, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
-cell5 = Cell(5, 0, 0.5, 0, False, False, 0, 1, fundamental_diagram, TIMESTEP)
+cell5 = Cell(5, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
 cell6 = Cell(6, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
 
 #define upstream demand
@@ -68,73 +68,46 @@ source_queue = []
 outflow_cell1 = []
 outflow_cell2 = []
 
-flow_data = np.zeros([7,SIMULATION_STEPS])
-density_data = np.zeros([7,SIMULATION_STEPS])
+flow_data = np.zeros([6,SIMULATION_STEPS])
+density_data = np.zeros([6,SIMULATION_STEPS])
+speed_data = np.zeros([6,SIMULATION_STEPS])
 #simulation
 while(simstep<SIMULATION_STEPS):
     #simulation step
     for cell in cells:
+
         #calculate cell
         cell.update(timestep=simstep)
-
-        #data plotting
-        if cell.id == 1:
-            flow_cell1.append(cell.flow)
-            speed_cell1.append(cell.speed)
-            density_cell1.append(cell.density)
-            outflow_cell1.append(cell.outflow)
-        elif cell.id == 2:
-            flow_cell2.append(cell.flow)
-            speed_cell2.append(cell.speed)
-            density_cell2.append(cell.density)
-            outflow_cell2.append(cell.outflow)
-        elif cell.id == 0:
-            source_outflow.append(cell.outflow)
-            source_queue.append(cell.queue)
         
-        cell.dump_data(flow_data, density_data)
+        #get data for plots
+        if type(cell) is Cell:
+            cell.dump_data(flow_data, density_data, speed_data)
     #advance simulation
     simstep += 1
 
-xvalues = np.linspace(0, SIMULATION_STEPS, SIMULATION_STEPS)
-yvalues = np.array([0, 1, 2, 3, 4, 5, 6])
+if True:
+    #plotting
+    xvalues = np.linspace(0, SIMULATION_STEPS, SIMULATION_STEPS)
+    yvalues = np.array([1, 2, 3, 4, 5, 6])
+    X, Y = np.meshgrid(xvalues, yvalues)
 
-X, Y = np.meshgrid(xvalues, yvalues)
+    #flow graph
+    fig1 = plt.figure()
+    fig1.suptitle('flow', fontsize=32)
+    ax1 = fig1.add_subplot(111, projection='3d')
+    ax1.plot_wireframe(X, Y, flow_data)
+    plt.show()
 
-fig1 = plt.figure()
-fig1.suptitle('flow')
-ax1 = fig1.add_subplot(111, projection='3d')
-ax1.plot_wireframe(X, Y, flow_data)
-plt.show()
+    #density graph
+    fig2 = plt.figure()
+    fig2.suptitle('density', fontsize=32)
+    ax2 = fig2.add_subplot(111, projection='3d')
+    ax2.plot_wireframe(X, Y, density_data)
+    plt.show()
 
-fig2 = plt.figure()
-fig2.suptitle('density')
-ax2 = fig2.add_subplot(111, projection='3d')
-ax2.plot_wireframe(X, Y, density_data)
-plt.show()
-
-
-#plot
-fig, ax = plt.subplots(6, 1)
-
-t = np.linspace(0, SIMULATION_STEPS, SIMULATION_STEPS)
-ax[0].plot(t, flow_cell1)
-ax[0].plot(t, flow_cell2)
-ax[1].plot(t, speed_cell1)
-ax[1].plot(t, speed_cell2)
-ax[2].plot(t, density_cell1)
-ax[2].plot(t, density_cell2)
-ax[3].plot(t, outflow_cell1)
-ax[3].plot(t, outflow_cell2)
-ax[4].plot(t, source_outflow)
-ax[5].plot(t, source_queue)
-
-ax[0].set_title('flow')
-ax[1].set_title('speed')
-ax[2].set_title('density')
-ax[3].set_title('Outflow')
-ax[4].set_title('Upstream outflow')
-ax[5].set_title('Upstream queue')
-
-fig.tight_layout()
-#plt.show()
+    #speed graph
+    fig3 = plt.figure()
+    fig3.suptitle('speed', fontsize=32)
+    ax3 = fig3.add_subplot(111, projection='3d')
+    ax3.plot_wireframe(X, Y, speed_data)
+    plt.show()
