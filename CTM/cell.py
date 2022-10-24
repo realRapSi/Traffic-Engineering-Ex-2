@@ -9,10 +9,8 @@ class Cell:
         self.beta = beta
         self.lanes = lanes
         self.time_factor = timefactor
-        
         self.inflow = 0
         self.outflow = 0
-
         self.time_step = 0
     
         # objects
