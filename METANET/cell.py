@@ -31,8 +31,8 @@ class Cell:
         self.speed_update()
         self.flow_update()
         self.density_update()
+        self.time_step = timestep
 
-        #print('Cell {} stats:\nspeed: {}\nflow: {}\ndensity: {}'.format(self.id, self.speed, self.flow, self.density))
 
     def speed_update(self):
         if self.previous_cell and self.next_cell:

@@ -8,14 +8,14 @@ from fd import Fd
 from source import Source
 
 #parameters
-SIMULATION_STEPS  = 20
+SIMULATION_STEPS  = 500
 TIMESTEP = 10/3600
 
 #initialize FD
 fundamental_diagram = Fd(lanes=3)
 
 #initialize all cells
-cell1 = Cell(1, 0, 0.5, 8000, False, False, 3, fundamental_diagram, TIMESTEP)
+cell1 = Cell(1, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 cell2 = Cell(2, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 cell3 = Cell(3, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 cell4 = Cell(4, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
@@ -23,7 +23,7 @@ cell5 = Cell(5, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 cell6 = Cell(6, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 
 #define upstream demand
-demand_upstream_points = [0, 100/3600, 3150/3600, 3600/3600, 5000/3600]
+demand_upstream_points = [0, 450/3600, 3150/3600, 3600/3600, 5000/3600]
 demand_upstream_values = [0, 4000, 4000, 0, 0]
 #initialize upstream cell
 upstream = Source(0, TIMESTEP, demand_upstream_points, demand_upstream_values)
