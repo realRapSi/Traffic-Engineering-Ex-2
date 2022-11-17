@@ -25,7 +25,6 @@ class Source:
         self.queue += (self.current_demand - self.flow) * self.timestep_hour
         self.time_step = timestep
         #print(self.current_demand + self.queue / self.timestep_hour, self.next_cell.fd.maximum_flow, self.next_cell.fd.wavespeed*(self.next_cell.fd.jam_density-self.next_cell.density))
-
     def dump_data(self, flow=[], density=[], speed=[]):
         pass
 

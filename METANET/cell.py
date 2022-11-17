@@ -28,9 +28,9 @@ class Cell:
         
     #update parameters    
     def update(self, timestep):
+        self.density_update()
         self.speed_update()
         self.flow_update()
-        self.density_update()
         self.time_step = timestep
 
 

@@ -53,25 +53,11 @@ cell3.on_ramp = on_ramp1
 
 cells = [upstream, cell1, cell2, cell3, cell4, cell5, cell6]
 
-#testing
-simstep = 0
-flow_cell1 = []
-flow_cell2 = []
-speed_cell1 = []
-speed_cell2 = []
-density_cell1 = []
-density_cell2 = []
-
-source_outflow = []
-source_queue = []
-
-outflow_cell1 = []
-outflow_cell2 = []
-
 flow_data = np.zeros([6,SIMULATION_STEPS])
 density_data = np.zeros([6,SIMULATION_STEPS])
 speed_data = np.zeros([6,SIMULATION_STEPS])
 #simulation
+simstep = 0
 while(simstep<SIMULATION_STEPS):
     #simulation step
     for cell in cells:
