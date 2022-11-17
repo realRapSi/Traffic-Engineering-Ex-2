@@ -15,12 +15,12 @@ TIMESTEP = 10/3600
 fundamental_diagram = Fd(lanes=3)
 
 #initialize all cells
-cell1 = Cell(1, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
-cell2 = Cell(2, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
-cell3 = Cell(3, 0, 0.5, 0, True, False, 0, 3, fundamental_diagram, TIMESTEP)
-cell4 = Cell(4, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
-cell5 = Cell(5, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
-cell6 = Cell(6, 0, 0.5, 0, False, False, 0, 3, fundamental_diagram, TIMESTEP)
+cell1 = Cell(1, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
+cell2 = Cell(2, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
+cell3 = Cell(3, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
+cell4 = Cell(4, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
+cell5 = Cell(5, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
+cell6 = Cell(6, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 
 #define upstream demand
 demand_upstream_points = [0, 450/3600, 3150/3600, 3600/3600, 5000/3600]
@@ -32,7 +32,7 @@ upstream = Source(0, TIMESTEP, demand_upstream_points, demand_upstream_values)
 demand_onramp_points = [0, 900/3600, 2700/3600, 3600/3600, 5000/3600]
 demand_onramp_values = [0, 2500, 2500, 0, 0]
 #initialize on-ramp cell
-on_ramp1 = Source(7, TIMESTEP, demand_onramp_points, demand_onramp_values)
+
 
 #linking cells
 upstream.next_cell = cell1
@@ -47,17 +47,19 @@ cell4.next_cell = cell5
 cell5.previous_cell = cell4
 cell5.next_cell = cell6
 cell6.previous_cell = cell5
-on_ramp1.next_cell = cell3
-cell3.on_ramp = on_ramp1
 
 
 cells = [upstream, cell1, cell2, cell3, cell4, cell5, cell6]
 
+#data collection
 flow_data = np.zeros([6,SIMULATION_STEPS])
 density_data = np.zeros([6,SIMULATION_STEPS])
 speed_data = np.zeros([6,SIMULATION_STEPS])
+
 #simulation
 simstep = 0
+
+#simulation loop
 while(simstep<SIMULATION_STEPS):
     #simulation step
     for cell in cells:
