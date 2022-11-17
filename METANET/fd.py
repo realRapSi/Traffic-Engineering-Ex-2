@@ -12,10 +12,7 @@ class Fd:
         self.wavespeed = self.maximum_flow / (self.jam_density - self.critical_density)
     
     def get_flow(self, density):
-        temp_density = density * self.freeflow_speed * np.exp(-1/2 * (density / self.critical_density)**2)
-        if temp_density > self.jam_density:
-            return 0
-        return temp_density
+        return density * self.freeflow_speed * np.exp(-1/2 * (density / self.critical_density)**2)
 
     def get_speed(self, density):
         return self.freeflow_speed * np.exp(-1/2 * (density / self.critical_density)**2)

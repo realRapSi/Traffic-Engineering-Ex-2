@@ -1,5 +1,5 @@
 class Cell:
-    def __init__(self, id, vehicles, length, flow, has_onramp, has_offramp, lanes, fd, timefactor, thao=22, ny=15, kappa=10, delta=1.4):
+    def __init__(self, id, vehicles, length, flow, has_onramp, has_offramp, lanes, fd, timefactor, tao=22, ny=15, kappa=10, delta=1.4):
         self.id = id
         self.vehicles = vehicles
         self.length = length
@@ -14,7 +14,7 @@ class Cell:
         self.density = 0
 
         #model parameters
-        self.thao = thao / 3600
+        self.tao = tao / 3600
         self.ny = ny
         self.kappa = kappa
         self.delta = delta
@@ -28,25 +28,42 @@ class Cell:
         
     #update parameters    
     def update(self, timestep):
+        self.time_step = timestep
+        if self.has_onramp:
+            self.r = self.on_ramp.flow
         self.density_update()
         self.speed_update()
         self.flow_update()
-        self.time_step = timestep
-
 
     def speed_update(self):
         if self.previous_cell and self.next_cell:
-            self.speed = self.speed + self.time_factor / self.thao * (self.fd.get_speed(self.density) - self.speed) \
-                + self.time_factor / self.length * self.speed * (self.previous_cell.speed - self.speed) \
-                - (self.ny * self.time_factor) / (self.thao * self.length) * (self.next_cell.density - self.density) / (self.density + self.kappa) \
+            self.speed = self.speed + self.time_factor / self.tao * (self.fd.get_speed(self.density) - self.speed) \
+                + (self.time_factor / self.length) * self.speed * (self.previous_cell.speed - self.speed) \
+                - (self.ny * self.time_factor) / (self.tao * self.length) * (self.next_cell.density - self.density) / (self.density + self.kappa) \
                 - (self.delta * self.time_factor) / (self.length * self.lambdai) * (self.r * self.speed) / (self.density + self.kappa)
-        
+                 
         if not self.next_cell:
-            self.speed = self.speed + self.time_factor / self.thao * (self.fd.get_speed(self.density) - self.speed) \
+            self.speed = self.speed + self.time_factor / self.tao * (self.fd.get_speed(self.density) - self.speed) \
                 + self.time_factor / self.length * self.speed * (self.previous_cell.speed - self.speed) \
                 - (self.delta * self.time_factor) / (self.length * self.lambdai) * (self.r * self.speed) / (self.density + self.kappa)
+                
+        if self.speed < 0:
+            self.speed = 0
+            #print(self.id, self.time_step)
+            
     def flow_update(self):
         self.flow = self.fd.get_flow(self.density)
+        if self.next_cell:
+            if self.next_cell.has_onramp:
+                temp_outflow_cell = min(self.fd.get_flow(self.density), self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density), self.fd.maximum_flow)
+                temp_outflow_on_ramp = self.next_cell.on_ramp.on_ramp_temp_outflow(self.time_step)
+                downstream_supply = (self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density))
+                if (temp_outflow_on_ramp + temp_outflow_cell) <= downstream_supply:
+                    self.flow = temp_outflow_cell
+                    self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp)
+                else:
+                    self.flow = temp_outflow_cell / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply
+                    self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply)
 
     def density_update(self):
         if self.previous_cell:
