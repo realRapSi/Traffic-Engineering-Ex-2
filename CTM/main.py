@@ -30,7 +30,7 @@ upstream = Source(0, TIMESTEP, demand_upstream_points, demand_upstream_values)
 
 #define on-ramp demand
 demand_onramp_points = [0, 900/3600, 2700/3600, 3600/3600, 5000/3600]
-demand_onramp_values = [0, 2500, 2500, 0, 0]
+demand_onramp_values = [0, 2000, 2000, 0, 0]
 #initialize on-ramp cell
 on_ramp1 = Source(7, TIMESTEP, demand_onramp_points, demand_onramp_values)
 
@@ -56,6 +56,8 @@ cells = [upstream, cell1, cell2, cell3, cell4, cell5, cell6]
 flow_data = np.zeros([6,SIMULATION_STEPS])
 density_data = np.zeros([6,SIMULATION_STEPS])
 speed_data = np.zeros([6,SIMULATION_STEPS])
+vkt = vht = 0
+
 #simulation
 simstep = 0
 while(simstep<SIMULATION_STEPS):
@@ -64,6 +66,11 @@ while(simstep<SIMULATION_STEPS):
 
         #calculate cell
         cell.update(timestep=simstep)
+
+        #update performance parameters
+        temp_vkt, temp_vht = cell.performance_calculation()
+        vkt += temp_vkt
+        vht += temp_vht
         
         #get data for plots
         if type(cell) is Cell:
@@ -72,6 +79,7 @@ while(simstep<SIMULATION_STEPS):
     simstep += 1
 
 if True:
+    print(vkt, vht)
     #plotting
     xvalues = np.linspace(0, SIMULATION_STEPS, SIMULATION_STEPS)
     yvalues = np.array([1, 2, 3, 4, 5, 6])

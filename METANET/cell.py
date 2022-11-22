@@ -29,11 +29,14 @@ class Cell:
     #update parameters    
     def update(self, timestep):
         self.time_step = timestep
+
         if self.has_onramp:
             self.r = self.on_ramp.flow
+
+        self.flow_update()
         self.density_update()
         self.speed_update()
-        self.flow_update()
+        
 
     def speed_update(self):
         if self.previous_cell and self.next_cell:
@@ -49,32 +52,41 @@ class Cell:
                 
         if self.speed < 0:
             self.speed = 0
-            #print(self.id, self.time_step)
             
     def flow_update(self):
-        self.flow = self.fd.get_flow(self.density)
+        self.flow = min(self.density * self.speed, self.fd.maximum_flow)
         if self.next_cell:
+            self.flow = min(self.density * self.speed, self.fd.maximum_flow, self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density))
             if self.next_cell.has_onramp:
-                temp_outflow_cell = min(self.fd.get_flow(self.density), self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density), self.fd.maximum_flow)
+                temp_outflow_cell = self.flow
                 temp_outflow_on_ramp = self.next_cell.on_ramp.on_ramp_temp_outflow(self.time_step)
-                downstream_supply = (self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density))
+                downstream_supply = self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density)
                 if (temp_outflow_on_ramp + temp_outflow_cell) <= downstream_supply:
                     self.flow = temp_outflow_cell
                     self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp)
                 else:
                     self.flow = temp_outflow_cell / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply
                     self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply)
-
+      
     def density_update(self):
         if self.previous_cell:
             self.density = self.density + self.time_factor / (self.length * self.lambdai) * (self.previous_cell.flow - self.flow + self.r)
+            if self.density > self.fd.jam_density:
+                print(self.time_step, 'alarm', self.id, self.density)
 
     def dump_data(self, flow=[], density=[], speed=[],):
         flow[self.id-1, self.time_step] = self.flow
         density[self.id-1, self.time_step] = self.density
         speed[self.id-1, self.time_step] = self.speed
 
+    def performance_calculation(self):
+        cell_vkt = self.time_factor * self.flow * self.length
+        cell_vht = self.time_factor * self.density * self.length
 
+        if self.has_onramp:
+            cell_vht += self.on_ramp.queue * self.time_factor
+
+        return cell_vkt, cell_vht
 
 
         

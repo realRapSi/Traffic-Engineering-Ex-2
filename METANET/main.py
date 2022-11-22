@@ -1,7 +1,3 @@
-# TODO
-# density in cell 2 is going above jam density -> identify impact of reduced outflow in cell 2 due to onramp -> fix issue to propagate density upstream
-
-
 #libraries
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,6 +11,7 @@ from source import Source
 #parameters
 SIMULATION_STEPS  = 500
 TIMESTEP = 10/3600
+ALINEA = False
 
 #initialize FD
 fundamental_diagram = Fd(lanes=3)
@@ -24,18 +21,18 @@ cell1 = Cell(1, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 cell2 = Cell(2, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 cell3 = Cell(3, 0, 0.5, 0, True, False, 3, fundamental_diagram, TIMESTEP)
 cell4 = Cell(4, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
-cell5 = Cell(5, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
+cell5 = Cell(5, 0, 0.5, 0, False, False, 1, Fd(lanes=1), TIMESTEP)
 cell6 = Cell(6, 0, 0.5, 0, False, False, 3, fundamental_diagram, TIMESTEP)
 
 #define upstream demand
 demand_upstream_points = [0, 450/3600, 3150/3600, 3600/3600, 5000/3600]
-demand_upstream_values = [0, 4000, 4000, 0, 0]
+demand_upstream_values = [0, 1500, 1500, 0, 0]
 #initialize upstream cell
 upstream = Source(0, TIMESTEP, demand_upstream_points, demand_upstream_values)
 
 #define on-ramp demand
 demand_onramp_points = [0, 900/3600, 2700/3600, 3600/3600, 5000/3600]
-demand_onramp_values = [0, 2500, 2500, 0, 0]
+demand_onramp_values = [0, 1500, 1500, 0, 0]
 #initialize on-ramp cell
 on_ramp1 = Source(7, TIMESTEP, demand_onramp_points, demand_onramp_values)
 
@@ -62,6 +59,8 @@ cells = [upstream, cell1, cell2, cell3, cell4, cell5, cell6]
 flow_data = np.zeros([6,SIMULATION_STEPS])
 density_data = np.zeros([6,SIMULATION_STEPS])
 speed_data = np.zeros([6,SIMULATION_STEPS])
+vkt = 0
+vht = 0
 
 #simulation
 simstep = 0
@@ -73,13 +72,18 @@ while(simstep<SIMULATION_STEPS):
 
         #calculate cell
         cell.update(timestep=simstep)
+
+        #update performance parameters
+        temp_vkt, temp_vht = cell.performance_calculation()
+        vkt += temp_vkt
+        vht += temp_vht
         
         #get data for plots
         if type(cell) is Cell:
             cell.dump_data(flow_data, density_data, speed_data)
     #advance simulation
     simstep += 1
-
+print(vkt, vht)
 if True:
     #plotting
     xvalues = np.linspace(0, SIMULATION_STEPS, SIMULATION_STEPS)

@@ -81,6 +81,15 @@ class Cell:
         density[self.id-1, self.time_step] = self.density
         speed[self.id-1, self.time_step] = self.speed
 
+    def performance_calculation(self):
+        cell_vkt = self.time_factor * self.flow * self.length
+        cell_vht = self.time_factor * self.density * self.length
+
+        if self.has_onramp:
+            cell_vht += self.on_ramp.queue * self.time_factor
+
+        return cell_vkt, cell_vht
+
 
 
 

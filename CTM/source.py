@@ -41,5 +41,7 @@ class Source:
     def on_ramp_update(self, outflow_reduced):
         self.outflow = outflow_reduced
         self.queue = self.queue + (self.current_demand - outflow_reduced) * self.timestep_hour
-        print(self.queue)
+    
+    def performance_calculation(self):
+        return 0, (self.queue * self.timestep_hour)
 
