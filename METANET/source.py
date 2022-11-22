@@ -1,6 +1,6 @@
 import numpy as np
 class Source:
-    def __init__(self, id, timestep, demand_points=[], demand_values=[]):
+    def __init__(self, id, timestep, demand_points=[], demand_values=[], alinea=False, alinea_k=0):
         self.id  = id
         self.demand_points = demand_points
         self.demand_values = demand_values
@@ -11,6 +11,8 @@ class Source:
         self.speed = 0
         self.time_step = 0
         self.timestep_hour = timestep
+        self.alinea = alinea
+        self.alinea_k = alinea_k
 
         # objects
         self.next_cell = None
@@ -21,7 +23,6 @@ class Source:
 
         self.queue += (self.current_demand - self.flow) * self.timestep_hour
         self.time_step = timestep
-        print('upstream', self.queue)
 
     def demand_function(self, simstep):
         current_timestep = simstep * self.timestep_hour
@@ -35,8 +36,14 @@ class Source:
     def on_ramp_update(self, outflow_reduced):
         self.flow = outflow_reduced
         self.queue = self.queue + (self.current_demand - outflow_reduced) * self.timestep_hour
-        print('on-ramp', self.queue)
-        
+    
+    def on_ramp_outflow_alinea(self, timestep, downstream_crit_density, downstream_density):
+        self.current_demand = self.demand_function(simstep= timestep)
+        self.time_step = timestep
+        self.flow = min(self.flow + self.alinea_k * (downstream_crit_density - downstream_density), self.current_demand + self.queue / self.timestep_hour)
+        self.queue += (self.current_demand - self.flow) * self.timestep_hour
+        print(self.flow, self.queue)
+        return self.flow
 
     def performance_calculation(self):
         return 0, (self.queue * self.timestep_hour)

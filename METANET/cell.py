@@ -58,15 +58,18 @@ class Cell:
         if self.next_cell:
             self.flow = min(self.density * self.speed, self.fd.maximum_flow, self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density))
             if self.next_cell.has_onramp:
-                temp_outflow_cell = self.flow
-                temp_outflow_on_ramp = self.next_cell.on_ramp.on_ramp_temp_outflow(self.time_step)
-                downstream_supply = self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density)
-                if (temp_outflow_on_ramp + temp_outflow_cell) <= downstream_supply:
-                    self.flow = temp_outflow_cell
-                    self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp)
+                if self.next_cell.on_ramp.alinea:
+                    self.next_cell.on_ramp.on_ramp_outflow_alinea(self.time_step, self.next_cell.fd.critical_density, self.next_cell.density)
                 else:
-                    self.flow = temp_outflow_cell / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply
-                    self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply)
+                    temp_outflow_cell = self.flow
+                    temp_outflow_on_ramp = self.next_cell.on_ramp.on_ramp_temp_outflow(self.time_step)
+                    downstream_supply = self.next_cell.fd.wavespeed * (self.next_cell.fd.jam_density - self.next_cell.density)
+                    if (temp_outflow_on_ramp + temp_outflow_cell) <= downstream_supply:
+                        self.flow = temp_outflow_cell
+                        self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp)
+                    else:
+                        self.flow = temp_outflow_cell / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply
+                        self.next_cell.on_ramp.on_ramp_update(temp_outflow_on_ramp / (temp_outflow_cell + temp_outflow_on_ramp) * downstream_supply)
       
     def density_update(self):
         if self.previous_cell:
