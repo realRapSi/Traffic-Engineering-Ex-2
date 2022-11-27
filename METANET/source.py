@@ -42,7 +42,6 @@ class Source:
         self.time_step = timestep
         self.flow = min(self.flow + self.alinea_k * (downstream_crit_density - downstream_density), self.current_demand + self.queue / self.timestep_hour)
         self.queue += (self.current_demand - self.flow) * self.timestep_hour
-        print(self.flow, self.queue)
         return self.flow
 
     def performance_calculation(self):

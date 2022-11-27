@@ -119,7 +119,7 @@ temp_min_vht = None
 k_runner = 0
 
 #simulation
-while k_runner <= 1:
+while k_runner <= 100:
     #initialize on-ramp cell
     if alinea_optimisation:
         on_ramp1 = Source(7, TIMESTEP, demand_onramp_points, demand_onramp_values, ALINEA, k_runner)
@@ -173,7 +173,6 @@ while k_runner <= 1:
                 cell.dump_data(flow_data, density_data, speed_data)
         #advance simulation
         simstep += 1
-    print(vkt, vht, k_runner)
 
     if not alinea_optimisation:
         break
@@ -187,7 +186,7 @@ while k_runner <= 1:
             temp_min_vht = vht
             temp_min_vkt = vkt
 
-        k_runner += 0.001
+        k_runner += 0.1
 if alinea_optimisation: 
     print('optimized results\nBest K:',temp_best_k, 'Minimal VHT:',temp_min_vht, 'Minimal VKT:',temp_min_vkt)
 
@@ -202,6 +201,9 @@ if True:
     fig1.suptitle('flow', fontsize=32)
     ax1 = fig1.add_subplot(111, projection='3d')
     ax1.plot_wireframe(X, Y, flow_data)
+    ax1.set_ylabel('Cell #')
+    ax1.set_xlabel('Time [10 s]')
+    ax1.set_zlabel('Flow [veh / h]')
     plt.show()
 
     #density graph
@@ -209,6 +211,9 @@ if True:
     fig2.suptitle('density', fontsize=32)
     ax2 = fig2.add_subplot(111, projection='3d')
     ax2.plot_wireframe(X, Y, density_data)
+    ax2.set_ylabel('Cell #')
+    ax2.set_xlabel('Time [10 s]')
+    ax2.set_zlabel('Density [veh / km]')
     plt.show()
 
     #speed graph
@@ -216,4 +221,7 @@ if True:
     fig3.suptitle('speed', fontsize=32)
     ax3 = fig3.add_subplot(111, projection='3d')
     ax3.plot_wireframe(X, Y, speed_data)
+    ax3.set_ylabel('Cell #')
+    ax3.set_xlabel('Time [10 s]')
+    ax3.set_zlabel('Velocity [km / h]')
     plt.show()

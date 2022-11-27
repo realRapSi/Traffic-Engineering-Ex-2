@@ -74,8 +74,6 @@ class Cell:
     def density_update(self):
         if self.previous_cell:
             self.density = self.density + self.time_factor / (self.length * self.lambdai) * (self.previous_cell.flow - self.flow + self.r)
-            if self.density > self.fd.jam_density:
-                print(self.time_step, 'alarm', self.id, self.density)
 
     def dump_data(self, flow=[], density=[], speed=[],):
         flow[self.id-1, self.time_step] = self.flow
