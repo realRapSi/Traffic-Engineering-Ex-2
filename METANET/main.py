@@ -175,6 +175,7 @@ while k_runner <= 100:
         simstep += 1
 
     if not alinea_optimisation:
+        print('VHT:', vht, 'VKT:', vkt)
         break
     else:
         if not temp_min_vht == None:
