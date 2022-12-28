@@ -178,6 +178,7 @@ while k_runner <= 100:
         print('VHT:', vht, 'VKT:', vkt)
         break
     else:
+        print(k_runner, vkt, vht)
         if not temp_min_vht == None:
             if temp_min_vht > vht:
                 temp_min_vht = vht

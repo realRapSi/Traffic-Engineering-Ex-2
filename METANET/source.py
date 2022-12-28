@@ -23,6 +23,7 @@ class Source:
 
         self.queue += (self.current_demand - self.flow) * self.timestep_hour
         self.time_step = timestep
+        print(self.queue)
 
     def demand_function(self, simstep):
         current_timestep = simstep * self.timestep_hour
